@@ -82,8 +82,16 @@ int main () {
             sum += duration.count();
             delete &c;
         }
-        int mean =  sum / REPEAT;
-        fout << "Testul #" << test << " durata: " << mean << " ms.\n";
+        double mean =  (sum *1.0) / (REPEAT * 1.0);
+        string convert_unit_str = "";
+        if (mean > 60 * 1000) {   
+            int minutes = ((int) mean) / (60 * 1000);
+            int seconds = (mean - 60 * 1000 * minutes) / 1000;
+            convert_unit_str = "(" + to_string(minutes) + " m " + to_string(seconds) + " s)";
+        } else if (mean > 1000) {
+            convert_unit_str = "(" + to_string(mean/1000.0) + " s)";
+        }
+        fout << "Testul #" << test << " durata: " << mean << " ms" << convert_unit_str <<".\n";
         //Matrix &c =Matrix::multiply(a, b);
         //c.print(fout);
         delete &a;
