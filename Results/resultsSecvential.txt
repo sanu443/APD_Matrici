@@ -1,0 +1,10 @@
+Testul #0 durata: 0 ms.
+Testul #1 durata: 0 ms.
+Testul #2 durata: 0 ms.
+Testul #3 durata: 0.2 ms.
+Testul #4 durata: 7.2 ms.
+Testul #5 durata: 69 ms.
+Testul #6 durata: 628 ms.
+Testul #7 durata: 7211 ms(7.211000 s).
+Testul #8 durata: 88466.6 ms(1 m 28 s).
+Testul #9 durata: 841557 ms(14 m 1 s).

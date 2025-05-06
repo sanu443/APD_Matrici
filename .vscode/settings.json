@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "*.c": "c",
+        "*.cpp": "cpp",
         "istream": "cpp",
         "atomic": "cpp",
         "cctype": "cpp",
@@ -41,6 +42,26 @@
         "xstring": "cpp",
         "xtr1common": "cpp",
         "xutility": "cpp",
-        "chrono": "cpp"
+        "chrono": "cpp",
+        "algorithm": "cpp",
+        "bit": "cpp",
+        "charconv": "cpp",
+        "format": "cpp",
+        "forward_list": "cpp",
+        "iomanip": "cpp",
+        "iostream": "cpp",
+        "locale": "cpp",
+        "optional": "cpp",
+        "ostream": "cpp",
+        "random": "cpp",
+        "ratio": "cpp",
+        "sstream": "cpp",
+        "stop_token": "cpp",
+        "thread": "cpp",
+        "vector": "cpp",
+        "xlocbuf": "cpp",
+        "xlocmes": "cpp",
+        "xlocmon": "cpp",
+        "xloctime": "cpp"
     }
 }
