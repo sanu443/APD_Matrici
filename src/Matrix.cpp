@@ -1,4 +1,5 @@
 #include "Matrix.h"
+#include <mpi.h>    
 #include <stdlib.h>
 #include <fstream>
 #include <thread>
@@ -27,7 +28,7 @@ Matrix::~Matrix() {
 void Matrix::read(ifstream &fin) {
     fin >> n;
     alloc(n);
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++) 
         for (int j = 0; j < n; j++)
             fin >> mat[i][j];
 }
@@ -80,6 +81,8 @@ Matrix& Matrix::multiplyParallel1(const Matrix &a, const Matrix &b) {
 }
 
 
+
+
 Matrix& Matrix::multiply (const Matrix &a, const Matrix &b) {
     int n = a.n;
     Matrix &c = *new Matrix(n);
@@ -91,3 +94,69 @@ Matrix& Matrix::multiply (const Matrix &a, const Matrix &b) {
         }
     return c;
 }
+
+Matrix& Matrix::multiplyParallel2(const Matrix& a, const Matrix& b) {
+    int rank, size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    int n = a.n;
+    Matrix* c = new Matrix(n);
+
+
+    for (int i = 0; i < n; ++i)
+        MPI_Bcast(b.mat[i], n, MPI_INT, 0, MPI_COMM_WORLD);
+
+    int chunk = n / size;
+    int rem = n % size;
+    int start = rank * chunk + std::min(rank, rem);
+    int end = start + chunk + (rank < rem ? 1 : 0);
+    Matrix localA(end - start);
+    for (int i = 0; i < end - start; ++i)
+        localA.mat[i] = new int[n];
+
+    if (rank == 0) {
+        for (int proc = 0; proc < size; ++proc) {
+            int s = proc * chunk + std::min(proc, rem);
+            int e = s + chunk + (proc < rem ? 1 : 0);
+            for (int i = s; i < e; ++i) {
+                if (proc == 0)
+                    memcpy(localA.mat[i - s], a.mat[i], n * sizeof(int));
+                else
+                    MPI_Send(a.mat[i], n, MPI_INT, proc, i, MPI_COMM_WORLD);
+            }
+        }
+    } else {
+        for (int i = 0; i < end - start; ++i)
+            MPI_Recv(localA.mat[i], n, MPI_INT, 0, start + i, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    }
+
+    Matrix localC(end - start);
+    for (int i = 0; i < end - start; ++i) {
+        for (int j = 0; j < n; ++j) {
+            localC.mat[i][j] = 0;
+            for (int k = 0; k < n; ++k)
+                localC.mat[i][j] += localA.mat[i][k] * b.mat[k][j];
+        }
+    }
+
+    // Rezultatul se trimite la procesul 0
+    if (rank == 0) {
+        for (int i = 0; i < end - start; ++i)
+            memcpy(c->mat[start + i], localC.mat[i], n * sizeof(int));
+
+        for (int proc = 1; proc < size; ++proc) {
+            int s = proc * chunk + std::min(proc, rem);
+            int e = s + chunk + (proc < rem ? 1 : 0);
+            for (int i = s; i < e; ++i)
+                MPI_Recv(c->mat[i], n, MPI_INT, proc, i, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        }
+    } else {
+        for (int i = 0; i < end - start; ++i)
+            MPI_Send(localC.mat[i], n, MPI_INT, 0, start + i, MPI_COMM_WORLD);
+    }
+
+    return *c;
+}
+
+

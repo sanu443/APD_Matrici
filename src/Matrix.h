@@ -17,4 +17,5 @@ public:
 
     static Matrix &multiply(const Matrix &a, const Matrix &b);
     static Matrix &multiplyParallel1(const Matrix &a, const Matrix &b);
+    static Matrix &multiplyParallel2(const Matrix &a, const Matrix &b);
 };
